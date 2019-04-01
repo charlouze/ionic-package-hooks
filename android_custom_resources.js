@@ -4,15 +4,12 @@ var path = require('path');
 var sourceDir = 'resources/android/custom';
 var platformDir = 'platforms/android';
 var resourceDirs = [
-  'res/drawable-ldpi',
   'res/drawable-mdpi',
   'res/drawable-hdpi',
-  'res/drawable-xhdpi',
-  'res/drawable-xxhdpi',
-  'res/drawable-xxxhdpi'
+  'res/drawable-xhdpi'
 ];
 
-module.exports = function(ctx) {
+module.exports = function (ctx) {
   if (ctx.opts.platforms.indexOf('android') < 0) {
     return;
   }
@@ -25,31 +22,31 @@ module.exports = function(ctx) {
   function copy(src, dest) {
     var deferred = Q.defer();
 
-    fs.stat(src, function(err, stats) {
+    fs.stat(src, function (err, stats) {
       if (err || !stats.isFile()) {
         return deferred.reject(err);
       }
 
-      fs.stat(path.dirname(dest), function(err, stats) {
+      fs.stat(path.dirname(dest), function (err, stats) {
         if (err || !stats.isDirectory()) {
           return deferred.reject(err);
         }
 
         var rs = fs.createReadStream(src);
 
-        rs.on('error', function(err) {
+        rs.on('error', function (err) {
           console.error(err.stack);
           deferred.reject(err);
         });
 
         var ws = fs.createWriteStream(dest);
 
-        ws.on('error', function(err) {
+        ws.on('error', function (err) {
           console.error(err.stack);
           deferred.reject(err);
         });
 
-        ws.on('close', function() {
+        ws.on('close', function () {
           deferred.resolve();
         });
 
@@ -60,12 +57,12 @@ module.exports = function(ctx) {
     return deferred.promise;
   }
 
-  fs.stat(customResourcesDir, function(err, stats) {
+  fs.stat(customResourcesDir, function (err, stats) {
     if (err || !stats.isDirectory()) {
       return deferred.resolve();
     }
 
-    fs.readdir(customResourcesDir, function(err, files) {
+    fs.readdir(customResourcesDir, function (err, files) {
       var copies = [];
 
       for (var i in files) {
@@ -77,13 +74,13 @@ module.exports = function(ctx) {
         }
       }
 
-      copies.map(function(args) {
+      copies.map(function (args) {
         return copy.apply(copy, args);
       });
 
-      Q.all(copies).then(function(r) {
+      Q.all(copies).then(function (r) {
         deferred.resolve();
-      }, function(err) {
+      }, function (err) {
         console.error(err.stack);
         deferred.reject(err);
       });
